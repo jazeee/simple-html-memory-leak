@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<script>
+  function Listener() {
+    this.data = Array(10*1000*1000 + nextId).join('1');
+
+    this.onNotification = (value) => {
+      console.log(value, this.data[Math.floor(Math.random() * this.data.length)]);
+    }
+    this.onNotification('test notification');
+  }
+
+  const listeners = {};
+  let nextId = 0;
+  let lastClearedId = 0;
+  function addListener(listener) {
+    console.log(this);
+    const currentId = nextId;
+    listeners[currentId] = listener;
+    console.log(`Added listener: ${currentId} `);
+    nextId += 1;
+  }
+  function notify() {
+    Object.keys(listeners).forEach(listenerId => {
+      const listener = listeners[listenerId]
+      listener.onNotification(`Hello to listener: ${listenerId}`);
+    });
+  }
+  function unsubscribeFirstListener() {
+    if (lastClearedId < nextId) {
+      console.log(`Deleting listener: ${lastClearedId}`);
+      delete listeners[lastClearedId];
+      lastClearedId += 1;
+    }
+  }
+</script>
+<body>
+  <h1>Memory Leak Testing</h1>
+  <p>This is just demo code to show how a memory leak can occur.</p>
+  <p>This code represents a publisher subscriber model.</p>
+  <p>If one is not careful, it can be quite easy to forget to unsubscribe.</p>
+  <p>Forgetting to unsubscribe can result in memory leaking and odd app behavior.</p>
+  <h2>How to Test</h2>
+  <p>
+    <ul>
+      <li>Open this page in Chrome</li>
+      <li>Open Chrome Debugger</li>
+      <li>Open Memory tab</li>
+      <li>Choose Allocation instrumentation on timeline</li>
+      <li>Click Start: <img src="memory-profiler.png" width="400" alt="memory profiler"/></li>
+      <li>Test buttons below and observe memory allocation and clean up</li>
+    </ul>
+  </p>
+
+  <button onclick="addListener(new Listener())">Add new listener</button>
+  <button onclick="notify()">Notify</button>
+  <button onclick="unsubscribeFirstListener()">Unsubscribe first listener</button>
+</body>
+</html>
